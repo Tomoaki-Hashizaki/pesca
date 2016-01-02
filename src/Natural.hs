@@ -3,6 +3,7 @@ module Natural where
 import PrelSequent
 import Sequent
 import PrSequent
+import PSequent
 
 type Hypotheses = [(Int,Formula)]
 
@@ -11,7 +12,7 @@ data NatProof =
  | Unknown Ident Formula
  | ConjI  Formula Formula NatProof NatProof
  | ConjE  Formula Formula Formula NatProof Int Int NatProof
- | DisjIl Formula Formula NatProof 
+ | DisjIl Formula Formula NatProof
  | DisjIr Formula Formula NatProof
  | DisjE  Formula Formula Formula NatProof Int NatProof Int NatProof
  | ImplI  Formula Formula Int NatProof
@@ -33,18 +34,18 @@ proof2natproof hypo proof =
      case (rule,sequent,proofs) of
        ("ax",  (_,         [a]),         []) ->
            findHypo hypo a
-       ("R&",  (_,         [Conj a b]),  [prem1,prem2]) -> 
+       ("R&",  (_,         [Conj a b]),  [prem1,prem2]) ->
            ConjI a b (pn prem1) (pn prem2)
-       ("L&",  (Conj a b:_,[c]),         [prem1]) -> 
+       ("L&",  (Conj a b:_,[c]),         [prem1]) ->
            ConjE a b c mainprem h1 (h1 + 1) (pn' [a,b] prem1)
              where
                mainprem = findHypo hypo (Conj a b)
                h1       = maximum' (map fst hypo) + 1
-       ("Rv1", (_,         [Disj a b]),  [prem1]) -> 
+       ("Rv1", (_,         [Disj a b]),  [prem1]) ->
            DisjIl a b (pn prem1)
-       ("Rv2", (_,         [Disj a b]),  [prem1]) -> 
+       ("Rv2", (_,         [Disj a b]),  [prem1]) ->
            DisjIr a b (pn prem1)
-       ("Lv",  (Disj a b:_,[c]),         [prem1,prem2]) -> 
+       ("Lv",  (Disj a b:_,[c]),         [prem1,prem2]) ->
            DisjE a b c mainprem h1 (pn' [a] prem1) h2 (pn' [b] prem2)
              where
                mainprem = findHypo hypo (Disj a b)
@@ -65,29 +66,29 @@ proof2natproof hypo proof =
              where
                a'       = leftFormOf prem1
 
-       ("L->", (Impl a b:_,[c]),         [prem1,prem2]) -> 
+       ("L->", (Impl a b:_,[c]),         [prem1,prem2]) ->
            ImplE a b c mainprem (pn prem1) h1 (pn' [b] prem2)
              where
                mainprem = findHypo hypo (Impl a b)
                h1       = maximum' (map fst hypo) + 1
 
 
-       ("L->", (Neg a:_,[c]),         [prem1,prem2]) -> 
+       ("L->", (Neg a:_,[c]),         [prem1,prem2]) ->
            ImplE a Falsum c mainprem (pn prem1) h1 (pn' [Falsum] prem2)
              where
                mainprem = findHypo hypo (Impl a Falsum)
                h1       = maximum' (map fst hypo) + 1
-       ("L_|_", (Falsum:_, [c]),[]) -> 
+       ("L_|_", (Falsum:_, [c]),[]) ->
            FalsE c mainprem
              where
                mainprem = findHypo hypo Falsum
-       ("L/A", (Univ x a:_,[c]),         [prem1]) -> 
+       ("L/A", (Univ x a:_,[c]),         [prem1]) ->
            UnivE a a' c mainprem h1 (h1 + 1) (pn' [a', Univ x a] prem1)
              where
                a'       = leftFormOf prem1
                mainprem = findHypo hypo (Univ x a)
                h1       = maximum' (map fst hypo) + 1
-       ("L/E", (Exist x a:_,[c]),         [prem1]) -> 
+       ("L/E", (Exist x a:_,[c]),         [prem1]) ->
            ExistE a c mainprem h1 (pn' [a] prem1)
              where
                mainprem = findHypo hypo (Exist x a)
@@ -96,7 +97,7 @@ proof2natproof hypo proof =
 
 
    _ -> Unknown "undef" (Scheme "?" [])
-  where 
+  where
      pn           = proof2natproof hypo
      pn' formulae = proof2natproof (freshHypos formulae hypo)
      leftFormOf p = case p of
@@ -105,7 +106,7 @@ proof2natproof hypo proof =
                       _                 -> Scheme "\\mbox{ass.}" []
 
 maximum' []  = 0
-maximum' l   = maximum l 
+maximum' l   = maximum l
 
 freshHypos :: [Formula] -> Hypotheses -> Hypotheses
 freshHypos formulae hypo = zip [nxt ..] formulae ++ hypo where
@@ -117,12 +118,12 @@ findHypo hypo formula =
    Just n -> Hypo n formula
    _      -> case formula of
                Neg a         -> findHypo hypo (Impl a Falsum)
-               Impl a Falsum -> findHypo hypo (Neg a) 
+               Impl a Falsum -> findHypo hypo (Neg a)
                _             -> Unknown "\\mbox{ass.}" formula
 
 prNatProof proof =
  case proof of
-   Hypo int formula -> 
+   Hypo int formula ->
      "\\discharge{" ++ show int ++ "}{" ++ prLatexFormula 1 formula ++ "}"
    Unknown ident formula ->
      "\\discharge{" ++ ident ++ "}{" ++ prLatexFormula 1 formula ++ "}"

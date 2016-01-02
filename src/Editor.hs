@@ -1,5 +1,6 @@
 module Main where
 
+import qualified Control.Exception as E
 import PrelSequent
 import Sequent
 import Interaction
@@ -8,19 +9,21 @@ import PrSequent
 import Calculi
 import Axioms
 import Natural
-import System.Cmd (system)
+import System.Process (system)
+import System.IO (hFlush, stdout)
 import System.IO.Error (isEOFError)
 
 -- sequent calculus proof editor. Aarne Ranta 8/4/1999 -- 26/4 -- 14/11/2000
 
 main :: IO ()
-main = do putStr welcomeMsg
-          editProofs ((rulesOfCalculus (Calculus ["G3i"]), Goal ([],[])),[])
-          return ()
+main = do
+  putStr welcomeMsg
+  _ <- editProofs ((rulesOfCalculus (Calculus ["G3i"]), Goal ([],[])),[])
+  return ()
 
 welcomeMsg =
- "\nWelcome to a proof editor for sequent calculus, version November 24, 2000." ++++
- "Written by Aarne Ranta, e-mail aarne@cs.chalmers.se" ++++
+ "\nWelcome to a proof editor for sequent calculus, version January 1, 2015." ++++
+ "Originally written by Aarne Ranta, and modified by Tomoaki Hashizaki thashizaki@jaist.ac.jp" ++++
  "Starting with the calculus G3i (intuitionistic predicate calculus)." ++++
  "Type ? for help on available commands.\n\n"
 
@@ -28,7 +31,8 @@ editProofs :: (Env,[String]) -> IO (Proof,String)
 editProofs envh@(env@(calculus,tree),history) =
  do
  putStr "|- "
- s <- catch getLine (\e -> if isEOFError e then return "q" else ioError e)
+ hFlush stdout
+ s <- getLine `E.catch` (\e -> if isEOFError e then return "q" else ioError e)
  let (comm,m0)  = case pCommand calculus s of
                     (x,""):_ -> (x,     "")
                     _        -> (CVoid, "No parse of command\n")
@@ -204,4 +208,3 @@ changeCalculus calc calc' =
    [] -> (calc,   "new calculus not recognized\n")
    _  -> (rcalc', "new calculus has" +++ show (length rcalc') +++ "rules\n")
   where rcalc' = rulesOfCalculus calc'
-

@@ -1,5 +1,5 @@
 name:                pesca
-version:             4.0.1
+version:             4
 synopsis:            Proof Editor for Sequent Calculus
 description:         Pesca is a program that helps in the construction of proofs
                      in sequent calculus. It works both as a proof editor and as an automatic theorem
@@ -26,7 +26,7 @@ tested-with:         GHC==6.8.2
 executable:          pesca
 main-is:             Editor.hs
 hs-source-dirs:      src
-other-modules:       Axioms, Calculi, Interaction, Natural, PrelSequent, PSequent, PrSequent, Sequent
+other-modules:       Axioms, Calculi, Interaction, Natural, PrelSequent, PrSequent, PSequent, Sequent
 
 ghc-options:         -Wall
 ghc-prof-options:    -prof -auto-all

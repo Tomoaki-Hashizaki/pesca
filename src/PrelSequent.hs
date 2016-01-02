@@ -1,4 +1,8 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module PrelSequent where
+
+import qualified Control.Exception as E
 
 infixr 5 +++
 infixr 5 ++++
@@ -47,7 +51,7 @@ a +++ b  = a ++ " "  ++ b
 a ++++ b = a ++ "\n" ++ b
 
 readFileIf :: String -> IO String
-readFileIf f = catch (readFile f) (\_ -> reportOn f) where
+readFileIf f = readFile f `E.catch` \(_ :: E.SomeException) -> reportOn f where
  reportOn f =
    do
    putStr ("File " ++ f ++ " does not exist. Returned empty string")
@@ -157,5 +161,3 @@ pIntc = some (satisfy numb) *** read
          where numb x = elem x ['0'..'9']
 
 fullParses p = map fst (filter ((==[]) . snd) p)
-
-
