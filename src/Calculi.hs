@@ -13,7 +13,7 @@ rulesOfCalculus (Calculus calcs) = foldl (++) [] (map rOf calcs) where
    "G3ip"  -> justPremises $ gxpL ++ gipR ++ g3iLImpl
    "G4ip"  -> justPremises $ gxpL ++ gipR ++ g4iLImpl
    "G3cp"  -> justPremises $ gxpL ++ gcpRL
-   "G3i"   -> justPremises  (gxpL ++ gipR ++ g3iLImpl) ++ g3xqL ++ g3iqR 
+   "G3i"   -> justPremises  (gxpL ++ gipR ++ g3iLImpl) ++ g3xqL ++ g3iqR
    "G3c"   -> justPremises  (gxpL ++ gcpRL           ) ++ g3xqL ++ g3cqR
    "G4i"   -> justPremises  (gxpL ++ gipR ++ g4iLImpl) ++ g3xqL ++ g3iqR
    "Geq"   -> gxeq
@@ -22,41 +22,41 @@ rulesOfCalculus (Calculus calcs) = foldl (++) [] (map rOf calcs) where
 
 prCalculi = "G3i G4i G3c G3ip G4ip G3cp Geq"
 
-justPremises :: [(Ident, Sequent -> Maybe [Sequent])] -> 
+justPremises :: [(Ident, Sequent -> Maybe [Sequent])] ->
                 [(Ident, Sequent -> Maybe [Either Sequent Ident])]
 justPremises = map jP where
- jP (i,f)    = (i, (\x -> mb (f x)))
+ jP (i,f)    = (i, \x -> mb (f x))
  mb (Just s) = Just (map Left s)
  mb Nothing  = Nothing
 
 gxpL =
- [("L&", \ (ant,suc) -> 
+ [("L&", \ (ant,suc) ->
               case ant of
                 Conj a b : rest -> Just [(a:b:rest, suc)]
                 _               -> Nothing),
-  ("Lv", \ (ant,suc) -> 
+  ("Lv", \ (ant,suc) ->
               case ant of
                 Disj a b : rest -> Just [(a:rest, suc), (b:rest, suc)]
                 _               -> Nothing),
-  ("L_|_",\ (ant,suc) -> 
+  ("L_|_",\ (ant,suc) ->
               case ant of
                 Falsum : rest   -> Just []
                 _               -> Nothing)]
 
 gipR =
-  [("R&", \ (ant,suc) -> 
+  [("R&", \ (ant,suc) ->
               case suc of
                 [Conj a b] -> Just [(ant,[a]),(ant,[b])]
                 _          -> Nothing),
-  ("Rv1", \ (ant,suc) -> 
+  ("Rv1", \ (ant,suc) ->
               case suc of
                 [Disj a b] -> Just [(ant,[a])]
                 _          -> Nothing),
-  ("Rv2", \ (ant,suc) -> 
+  ("Rv2", \ (ant,suc) ->
               case suc of
                 [Disj a b] -> Just [(ant,[b])]
                 _          -> Nothing),
-  ("R->", \ (ant,suc) -> 
+  ("R->", \ (ant,suc) ->
               case suc of
                 [Impl a b] -> Just [(a:ant,[b])]
                 [Neg  a]   -> Just [(a:ant,[Falsum])]
@@ -68,20 +68,20 @@ gipR =
  ]
 
 gcpRL =
-  [("R&", \ (ant,suc) -> 
+  [("R&", \ (ant,suc) ->
               case suc of
                 Conj a b:suc' -> Just [(ant, a:suc'),(ant, b:suc')]
                 _             -> Nothing),
-  ("Rv",  \ (ant,suc) -> 
+  ("Rv",  \ (ant,suc) ->
               case suc of
                 Disj a b:suc' -> Just [(ant, b:a:suc')]
                 _             -> Nothing),
-  ("R->", \ (ant,suc) -> 
+  ("R->", \ (ant,suc) ->
               case suc of
                 Impl a b:suc' -> Just [(a:ant, b:suc')]
                 Neg  a  :suc' -> Just [(a:ant, Falsum:suc')]
                 _             -> Nothing),
-  ("L->", \ (ant,suc) -> 
+  ("L->", \ (ant,suc) ->
                  case ant of
                    Impl a b : rest -> Just [(rest, a:suc), (b:rest,suc)]
                    Neg a    : rest -> Just [(rest, a:suc), (Falsum:rest,suc)]
@@ -93,7 +93,7 @@ gcpRL =
  ]
 
 g3iLImpl =
-    [("L->", \ (ant,suc) -> 
+    [("L->", \ (ant,suc) ->
                  case ant of
                    Impl a b : rest -> Just [(Impl a b :rest, [a]), (b:rest,suc)]
                    Neg a    : rest -> Just [(Impl a b :rest, [a]), (b:rest,suc)]
@@ -101,28 +101,28 @@ g3iLImpl =
                    _               -> Nothing)]
 
 g4iLImpl =
-    [("L0->", \ (ant,suc) -> 
+    [("L0->", \ (ant,suc) ->
                  case ant of
-                   Impl p b : rest | isNotComplex p && p `elem` rest -> 
+                   Impl p b : rest | isNotComplex p && p `elem` rest ->
                                Just [(p : b : rest, suc)]
-                   Neg  p   : rest | isNotComplex p && p `elem` rest -> 
+                   Neg  p   : rest | isNotComplex p && p `elem` rest ->
                                Just [(p : Falsum : rest, suc)]
                    _     -> Nothing),
-     ("L&->", \ (ant,suc) -> 
+     ("L&->", \ (ant,suc) ->
                  case ant of
-                   Impl (Conj c d) b : rest -> 
+                   Impl (Conj c d) b : rest ->
                                Just [(Impl c (Impl d b) : rest, suc)]
-                   Neg  (Conj c d)   : rest -> 
+                   Neg  (Conj c d)   : rest ->
                                Just [(Impl c (Impl d Falsum) : rest, suc)]
                    _               -> Nothing),
-     ("Lv->", \ (ant,suc) -> 
+     ("Lv->", \ (ant,suc) ->
                  case ant of
-                   Impl (Disj c d) b : rest -> 
+                   Impl (Disj c d) b : rest ->
                                Just [(Impl c b : Impl d b : rest, suc)]
-                   Neg  (Disj c d)   : rest -> 
+                   Neg  (Disj c d)   : rest ->
                                Just [(Impl c Falsum : Impl d Falsum : rest, suc)]
                    _               -> Nothing),
-     ("L->->",\ (ant,suc) -> 
+     ("L->->",\ (ant,suc) ->
                  case ant of
                    Impl (Impl c d) b : rest ->
                           Just [(c : Impl d b : rest, [d]), (b : rest, suc)]
@@ -135,44 +135,44 @@ g4iLImpl =
                    _               -> Nothing)
  ]
 
-g3xqL = 
+g3xqL =
  [
-  ("L/A", \ (ant,suc) -> 
+  ("L/A", \ (ant,suc) ->
               case ant of
-                Univ x a : ant' -> 
+                Univ x a : ant' ->
                   Just [Left (a' : Univ x a : ant', suc), Right "t"]
                     where a' = substFormula ["t"] substVar [(x,NewMeta "t")] a
                 _          -> Nothing),
-  ("L/E", \ (ant,suc) -> 
+  ("L/E", \ (ant,suc) ->
               case ant of
-                Exist x a : ant' | notOccur x (ant' ++ suc) -> 
-                  Just [Left (a:ant', suc)]   --- A(y/x) pro A ?? 
+                Exist x a : ant' | notOccur x (ant' ++ suc) ->
+                  Just [Left (a:ant', suc)]   --- A(y/x) pro A ??
                 _          -> Nothing)
  ]
 
-g3iqR = 
- [("R/A", \ (ant,suc) -> 
+g3iqR =
+ [("R/A", \ (ant,suc) ->
               case suc of
-                [Univ x a] | notOccur x ant -> 
+                [Univ x a] | notOccur x ant ->
                   Just [Left (ant, [a])]   --- A(y/x) pro A ??
                 _          -> Nothing),
-  ("R/E", \ (ant,suc) -> 
+  ("R/E", \ (ant,suc) ->
               case suc of
-                [Exist x a] -> 
+                [Exist x a] ->
                   Just [Left (ant, [a']), Right "t"]
                     where a' = substFormula ["t"] substVar [(x,NewMeta "t")] a
                 _          -> Nothing)
  ]
 
-g3cqR = 
- [("R/A", \ (ant,suc) -> 
+g3cqR =
+ [("R/A", \ (ant,suc) ->
               case suc of
-                Univ x a : suc' | notOccur x (ant ++ suc') -> 
+                Univ x a : suc' | notOccur x (ant ++ suc') ->
                   Just [Left (ant, a:suc')]   --- A(y/x) pro A ??
                 _          -> Nothing),
-  ("R/E", \ (ant,suc) -> 
+  ("R/E", \ (ant,suc) ->
               case suc of
-                Exist x a : suc' -> 
+                Exist x a : suc' ->
                   Just [Left (ant, a' : Exist x a : suc'), Right "t"]
                     where a' = substFormula ["t"] substVar [(x,NewMeta "t")] a
                 _          -> Nothing)
@@ -180,11 +180,11 @@ g3cqR =
 
 gxeq =
  [
-  ("Ref", \ (ant,suc) -> 
+  ("Ref", \ (ant,suc) ->
              Just [Left (equ (NewMeta "a") (NewMeta "a") : ant, suc), Right "a"]),
-  ("Repl", \ (ant,suc) -> 
+  ("Repl", \ (ant,suc) ->
               case ant of
-                Predic "=" [a,b] : p : rest | atomicOn a p -> 
+                Predic "=" [a,b] : p : rest | atomicOn a p ->
                   Just [Left (atomSubst p a b : ant, suc), Right "a", Right "b"]
                 _ -> Nothing)
  ]

@@ -18,7 +18,7 @@ axiom2rule :: Axiom -> AbsRule
 axiom2rule (prems,concl) =
   \ (ant,suc) ->
     case findInstanceOfAtoms concl ant of
-      Just insts -> Just (map (Left . (mkPrem insts)) prems ++ map Right params)
+      Just insts -> Just (map (Left . mkPrem insts) prems ++ map Right params)
        where
         mkPrem i p = (substFormula s substTerm i (atom2formula params p) : ant, suc)
                       where s = foldl (++) [] (map (freeVariablesOfTerm . snd) i)
@@ -53,7 +53,7 @@ instanceOfAtoms atoms formulae =
   then Just [(a,f) | (a,Just f) <- insts]
   else Nothing
    where
-    matchForm ((Atom pred args),formula) =
+    matchForm (Atom pred args,formula) =
       case formula of
         Predic f xx | f == pred && length xx == length args -> True
         _ -> False
@@ -63,8 +63,8 @@ instanceOfAtoms atoms formulae =
        (Par a,f)                       -> [(a,Just f)]
        (Appl c a, Apply c' a') | c==c' -> foldl (++) [] (map tryInst (zip a a'))
        _                               -> [("x",Nothing)]
-    args1 = (foldl (++) [] [xx | Atom   _ xx <- atoms])
-    args2 = (foldl (++) [] [xx | Predic _ xx <- formulae])
+    args1 = foldl (++) [] [xx | Atom   _ xx <- atoms]
+    args2 = foldl (++) [] [xx | Predic _ xx <- formulae]
     consistent t = all (`lookupIsUnique` t) (map fst t)
     complete t =
      case t of
@@ -118,10 +118,10 @@ prLatexAxiom (name,(prems,concl)) =
 -----------------
 
 pAxiom :: Parser Char Axiom
-pAxiom      = ((pConclusion ..+ jL "->" ||| succeed []) ... pPremises
+pAxiom      = (pConclusion ..+ jL "->" ||| succeed []) ... pPremises
                  *** (\ (x,y) -> (y,x))
               |||
-               jL "~" +.. (pConclusion ||| pParenth pConclusion) *** (\x -> ([],x)))
+               jL "~" +.. (pConclusion ||| pParenth pConclusion) *** (\x -> ([],x))
 pPremises   = pTList "v" pAtom ||| lits "_|_" <<< []
 pConclusion = pTList "&" pAtom
 

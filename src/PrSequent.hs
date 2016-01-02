@@ -40,7 +40,7 @@ prProof = prProofNodes False
 prProofNodes sh tree = foldr1 lined (map prLine layers) ++ prParams where ---
  layers    = [[prSeqn sh n s | ((n,s),_) <- nodesOfProof tree, length n == ht-k]
                                                                 | k <- [0 .. ht-1]]
- prSeqn sh n s = (if sh then ((concat (map show n))+++) else id) (prSequent s)
+ prSeqn sh n s = (if sh then (concat (map show n)+++) else id) (prSequent s) 
  ht        = htProof tree
  prLine    = foldr1 (\x y -> x ++ "   " ++ y)
  lined x y = x ++++ replicate (length x) '-' ++++ y

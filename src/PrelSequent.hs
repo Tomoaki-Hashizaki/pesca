@@ -36,7 +36,7 @@ combinations t = case t of []    -> [[]]
 data Err a = Ok a | Bad String            -- like Maybe type with error msgs
 
 mberr s (Just c)  = Ok c                   -- add msg s to Maybe failures
-mberr s (Nothing) = Bad s
+mberr s Nothing   = Bad s
 
 okError :: Err a -> a
 okError c = case c of Ok a -> a

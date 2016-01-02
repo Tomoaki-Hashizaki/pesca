@@ -45,7 +45,7 @@ editProofs envh@(env@(calculus,tree),history) =
    putStr "\n"
    putStr msg
    putStr "\n"
-   (case comm of
+   case comm of
       CAxioms file  -> do s <- readFileIf file
                           let (na@(_,a),m) = readAxioms s
                               a'    = axioms2calculus a in
@@ -68,7 +68,7 @@ editProofs envh@(env@(calculus,tree),history) =
                           return (tree',"")
       CManual       -> do system "latex manual.tex >& /dev/null ; xdvi manual.dvi &"
                           editProofs envh'
-      _             -> editProofs envh')
+      _             -> editProofs envh'
 
 -----------------------
 

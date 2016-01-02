@@ -38,7 +38,7 @@ instantiate calc param term proof =
   where
    substIn       = map (substFormula symbs substTerm [(param,term)])
                     where symbs = [] --- freeVariablesOfTerm term
-   instProofs pp = map (instantiate calc param term) (filter (/=(Param param)) pp)
+   instProofs pp = map (instantiate calc param term) (filter (/= Param param) pp)
 
 remove :: Proof -> [Int] -> (Proof,String)
 remove tree ints =
