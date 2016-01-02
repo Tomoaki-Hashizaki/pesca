@@ -25,7 +25,7 @@ infixr 3 <<<
 nub :: Eq a => [a] -> [a]
 nub l = case l of
           []  -> []
-          a:k -> if elem a k then nub k else a : nub k
+          a:k -> if a `elem` k then nub k else a : nub k
 
 combinations :: [[a]] -> [[a]]
 combinations t = case t of []    -> [[]]
@@ -123,7 +123,7 @@ longestOfMany p =
    (p .>. (\x -> longestOfMany p .>. (\y -> succeed (x:y))) +|| succeed [])
 
 pJunk   :: Parser Char String
-pJunk = longestOfMany (satisfy (\x -> elem x "\n\t "))
+pJunk = longestOfMany (satisfy (`elem` "\n\t "))
 
 pJ :: Parser Char a -> Parser Char a
 pJ p = pJunk +.. p ..+ pJunk
@@ -158,6 +158,6 @@ pFileName =
 
 pIntc :: Parser Char Int
 pIntc = some (satisfy numb) *** read
-         where numb x = elem x ['0'..'9']
+         where numb x = x `elem` ['0'..'9']
 
 fullParses p = map fst (filter ((==[]) . snd) p)
