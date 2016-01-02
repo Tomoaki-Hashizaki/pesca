@@ -131,7 +131,7 @@ pAtom  =
 
 pATerm  =
  pATerm2 ....
-  (pInfix .... pATerm2 *** (\ (f,y) -> \x -> Appl f [x,y]) ||| succeed id)
+  (pInfix .... pATerm2 *** (\ (f,y) x -> Appl f [x,y]) ||| succeed id)
    *** (\ (x,y) -> y x)
 
 pATerm2 =

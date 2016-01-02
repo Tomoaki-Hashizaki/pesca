@@ -24,9 +24,9 @@ pFormula 3 =
  ||| pParenth (pFormula 1)
 pFormula 2 =
   pFormula 3 ...
-   (jL "&" +.. pTList "&" (pFormula 3)   *** (\b -> \x -> Conj x (foldr1 Conj b))
+   (jL "&" +.. pTList "&" (pFormula 3)   *** (\b x -> Conj x (foldr1 Conj b))
      |||
-    jL "v" +.. pTList "v" (pFormula 3)   *** (\b -> \x -> Disj x (foldr1 Disj b))
+    jL "v" +.. pTList "v" (pFormula 3)   *** (\b x -> Disj x (foldr1 Disj b))
      |||
     succeed id)
       ***
@@ -40,7 +40,7 @@ pFormula 1 =
 
 pTerm =
   pTerm2 ....
-  (pInfix .... pTerm2 *** (\ (f,y) -> \x -> Apply f [x,y]) ||| succeed id)
+  (pInfix .... pTerm2 *** (\ (f,y) x -> Apply f [x,y]) ||| succeed id)
    *** (\ (x,y) -> y x)
 
 pTerm2 =
