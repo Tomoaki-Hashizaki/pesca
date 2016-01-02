@@ -50,8 +50,8 @@ prProofNodes sh tree = foldr1 lined (map prLine layers) ++ prParams where ---
                _  -> "\n\nParameters" +++ foldr1 (+++) pp
 
 ---------
-
-prGoals goals = foldr (++++) "" (map prGoal goals) where
+prGoals :: [Either ([Int],Sequent) Ident]  -> String
+prGoals = foldr ((++++) . prGoal) [] where
  prGoal (Left (ints,sequent)) = prGoalId ints +++ "=" +++ prSequent sequent
  prGoal (Right par)           = par +++ "=" +++ "?"
 

@@ -194,7 +194,7 @@ pCommand calculus =
 showAllApplicableRules :: (AbsCalculus,Proof) -> [Int] -> String
 showAllApplicableRules (calculus,proof) ints =
  case lookup ints [x | Left x <- goalsOfProof proof] of
-   Just sequent -> foldr (++++) [] (map prAr (allApplicableRules calculus sequent))
+   Just sequent -> foldr ((++++) . prAr) [] (allApplicableRules calculus sequent)
    _            -> prGoalId ints +++ "does not exist"
   where
     prAr ((sq,(i,j)),((r,_),_)) =
