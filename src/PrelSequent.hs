@@ -86,7 +86,7 @@ p1 ..+ p2 = p1 .>. (\x -> p2 .>. (\y -> succeed x))
 p *** f = p .>. (\x -> succeed (f x))
 
 (<<<) :: Parser a b -> c -> Parser a c  -- return
-p <<< v = p *** (\x -> v)
+p <<< v = p *** const v
 
 item :: Parser a a
 item [] = []
