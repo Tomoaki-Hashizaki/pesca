@@ -24,8 +24,8 @@ axiom2rule (prems,concl) =
                       where s = concatMap (freeVariablesOfTerm . snd) i
         params = nub [c | Atom _ args <- prems,
                           c <- concatMap parOf args,
-                          not (c `elem` [d | Atom _ xx <- concl,
-                                             d <- concatMap parOf xx])]
+                          c `notElem` [d | Atom _ xx <- concl,
+                                             d <- concatMap parOf xx]]
         parOf t =
          case t of
            Par x    -> [x]

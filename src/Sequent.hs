@@ -160,7 +160,7 @@ makeParams subst term =
     _             -> term
 
 notOccur :: Ident -> [Formula] -> Bool
-notOccur x cont = not (x `elem` concatMap freeVariables cont)
+notOccur x cont = x `notElem` concatMap freeVariables cont
 
 freeVariables :: Formula -> [Ident]
 freeVariables formula =
