@@ -6,7 +6,7 @@ module Sequent where
 type Ident = String
 
 data Formula = Scheme Ident [Term]      -- A           (schematic letter)
-             | Predic Ident [Term]      -- Pred(x,y)   (predication formula) 
+             | Predic Ident [Term]      -- Pred(x,y)   (predication formula)
              | Falsum                   -- _|_
              | Neg  Formula             -- ~A
              | Conj Formula Formula     -- A & B
@@ -40,7 +40,7 @@ infixFunction f  = case f of
 
 ------------------------
 
-data Proof = 
+data Proof =
    Goal Sequent
  | Param Ident
  | Proof Ident Sequent [Proof]   deriving (Eq,Show)
@@ -77,29 +77,29 @@ type AbsCalculus = [(Ident,AbsRule)]
 type GoalId = Either [Int] Ident  -- either premise or individual parametre
 
 goalsOfProof :: Proof -> [Either ([Int],Sequent) Ident]
-goalsOfProof tree = [Left x  | (x,True) <- nodesOfProof  tree] ++ 
-                    [Right y | y        <- paramsOfProof tree] 
+goalsOfProof tree = [Left x  | (x,True) <- nodesOfProof  tree] ++
+                    [Right y | y        <- paramsOfProof tree]
 
 nodesOfProof :: Proof -> [(([Int],Sequent), Bool)]
-nodesOfProof tree = giveNums [] 1 tree where
+nodesOfProof = giveNums [] 1 where
  giveNums n k tr =
-  case tr of 
+  case tr of
     Goal s        -> [((n ++ [k], s),True)]
     Proof _ s trs -> ((n ++ [k], s),False) :
-                         foldl (++) [] 
+                         foldl (++) []
                             [giveNums (n ++ [k]) i t | (i,t) <- zip [1..] trs]
     _             -> []
 
 paramsOfProof :: Proof -> [Ident]
-paramsOfProof tree = 
-  case tree of 
+paramsOfProof tree =
+  case tree of
     Goal s        -> []
     Param x       -> [x]
-    Proof _ s trs -> foldl (++) [] (map paramsOfProof trs) 
+    Proof _ s trs -> foldl (++) [] (map paramsOfProof trs)
 
 conclusionOfProof :: Proof -> Sequent
-conclusionOfProof tree = 
-  case tree of 
+conclusionOfProof tree =
+  case tree of
     Goal s        -> s
     Param x       -> ([],[])
     Proof _ s trs -> s
@@ -112,9 +112,9 @@ refreshIdent ids i = if i `elem` ids then refreshIdent ids (nxt i) else i where
 
 ---------------
 
-substFormula :: [Ident] -> ([(Ident,Term)] -> Term -> Term) -> 
+substFormula :: [Ident] -> ([(Ident,Term)] -> Term -> Term) ->
                                           [(Ident,Term)] -> Formula -> Formula
-substFormula symbs oper subst formula = 
+substFormula symbs oper subst formula =
   case formula of
      Scheme p terms  -> Scheme p (map (oper subst) terms)
      Predic p terms  -> Predic p (map (oper subst) terms)
@@ -128,7 +128,7 @@ substFormula symbs oper subst formula =
    where
     ss       = substFormula symbs     oper subst
     sss x y  = substFormula (y:symbs) oper ((x,Var y):subst)
-    mkVar x  = refreshIdent symbs x
+    mkVar    = refreshIdent symbs
 
 substVar :: [(Ident,Term)] -> Term -> Term
 substVar subst term =
@@ -162,7 +162,7 @@ makeParams subst term =
 
 notOccur :: Ident -> [Formula] -> Bool
 notOccur x cont = not (x `elem` foldl (++) [] (map freeVariables cont))
- 
+
 freeVariables :: Formula -> [Ident]
 freeVariables formula =
  case formula of
@@ -173,7 +173,7 @@ freeVariables formula =
     Disj a b        -> freeVariables a ++ freeVariables b
     Impl a b        -> freeVariables a ++ freeVariables b
     Univ x a        -> filter (/=x) (freeVariables a)
-    Exist x a       -> filter (/=x) (freeVariables a) 
+    Exist x a       -> filter (/=x) (freeVariables a)
     _               -> []
 
 freeVariablesOfTerm t =
@@ -194,10 +194,9 @@ eqMultis m1 m2 = length m1 == length m2 && m1 `subset` m2 where
  occs x k = length (filter (==x) k)
 
 ordsOfSequent :: Sequent -> [(Sequent,(Int,Int))]
-ordsOfSequent (ant,suc) = 
+ordsOfSequent (ant,suc) =
  [((ant',suc'),(i,j)) | (ant',i) <- ordsOf ant, (suc',j) <- ordsOf suc]
   where
     ordsOf []   = [([],0)]
-    ordsOf list = [(x : take (n-1) list ++ drop n list, n) | 
+    ordsOf list = [(x : take (n-1) list ++ drop n list, n) |
                                             (x,n) <- zip list [1..]]
-

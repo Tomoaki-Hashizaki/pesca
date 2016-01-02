@@ -8,7 +8,7 @@ import Sequent
 -- printing in ASCII
 
 prSequent :: Sequent -> String
-prSequent (ant,suc) = 
+prSequent (ant,suc) =
   prTList ", " (map (prFormula 1) ant) +++ "=>" +++
   prTList ", " (map (prFormula 1) (reverse suc))
 
@@ -38,16 +38,16 @@ prTerm t =
 
 prProof = prProofNodes False
 prProofNodes sh tree = foldr1 lined (map prLine layers) ++ prParams where ---
- layers    = [[prSeqn sh n s | ((n,s),_) <- nodesOfProof tree, length n == ht-k] 
+ layers    = [[prSeqn sh n s | ((n,s),_) <- nodesOfProof tree, length n == ht-k]
                                                                 | k <- [0 .. ht-1]]
- prSeqn sh n s = (if sh then ((concat (map show n))+++) else id) (prSequent s) 
+ prSeqn sh n s = (if sh then ((concat (map show n))+++) else id) (prSequent s)
  ht        = htProof tree
- prLine ss = foldr1 (\x y -> x ++ "   " ++ y) ss
+ prLine    = foldr1 (\x y -> x ++ "   " ++ y)
  lined x y = x ++++ replicate (length x) '-' ++++ y
- prParams  = let pp = paramsOfProof tree in 
+ prParams  = let pp = paramsOfProof tree in
               case pp of
                [] -> ""
-               _  -> "\n\nParameters" +++ foldr1 (+++) pp 
+               _  -> "\n\nParameters" +++ foldr1 (+++) pp
 
 ---------
 
@@ -65,7 +65,7 @@ prGoalId n = foldl1 (++) (map show n) -- works for 1..9 only
 prLatexProof proof = prLatexFile ("\\[" ++++ prProof proof ++++ "\\]") where
    prProof (Goal seq)             = makeLatex (prSequent seq ++ "^{??}")
    prProof (Param c)              = makeLatex (c +++ "= ?")
-   prProof (Proof ident seq [])   = 
+   prProof (Proof ident seq [])   =
      "\\infer{" ++++
      makeLatex (prSequent seq) ++++ "}{" ++ makeLatex ident ++ "}"
 --     makeLatex (prSequent seq ++ "^{" ++ ident ++"}") -- axiom without line
@@ -82,8 +82,8 @@ prLatexFile string =
  "\\setlength{\\parindent}{0mm}" ++++
 --- "\\newcommand{\\discharge}[2]{\\stackrel {#1. \\ }{[ #2 ]}}" ++++ -- JvP's
  "\\newcommand{\\discharge}[2]{\\begin{array}[b]{c} #1 \\\\ #2 \\end{array}}" ++++
- "\\begin{document}" ++++ 
- string ++++ 
+ "\\begin{document}" ++++
+ string ++++
  "\\end{document}"
 
 makeLatex s =
@@ -114,4 +114,3 @@ prArgList tt =
  case tt of
    []  -> ""
    _   -> "(" ++ prTList "," tt ++ ")"
-

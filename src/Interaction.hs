@@ -13,16 +13,16 @@ refine (calculus,tree) ints (i,j) ident =
      case refineLocal calculus ident goal of
        Ok obs -> (replace tree ints (Proof ident goal (map (newGoal obs) obs)),"")
        Bad s  -> (tree,s)
-      where  
+      where
        goal                   = (activate i ant, activate j suc)
-       newParams obls         = [(p, Meta (refreshP p)) | Right p <- obls] 
+       newParams obls         = [(p, Meta (refreshP p)) | Right p <- obls]
        newGoal obls g         = case g of
                                   (Left sequent) -> Goal  (refreshS obls sequent)
                                   (Right param)  -> Param (refreshP param)
-       refreshS obls (an,su)  = (map sp an, map sp su) 
+       refreshS obls (an,su)  = (map sp an, map sp su)
                                   where  ---
                                    sp = substFormula [] makeParams (newParams obls)
-       refreshP p             = refreshIdent (paramsOfProof tree) p
+       refreshP               = refreshIdent (paramsOfProof tree)
        activate int []        = []
        activate int cont      = let  n=int-1 in
                                  if   length cont < n then cont
@@ -35,13 +35,13 @@ instantiate calc param term proof =
    Goal (ant,suc)          -> Goal (substIn ant, substIn suc)
    Param x                 -> proof
    Proof rule (a,s) proofs -> Proof rule (substIn a, substIn s) (instProofs proofs)
-  where 
+  where
    substIn       = map (substFormula symbs substTerm [(param,term)])
                     where symbs = [] --- freeVariablesOfTerm term
    instProofs pp = map (instantiate calc param term) (filter (/=(Param param)) pp)
 
 remove :: Proof -> [Int] -> (Proof,String)
-remove tree ints = 
+remove tree ints =
  case lookup ints (map fst (nodesOfProof tree)) of
    Just sequent -> (replace tree ints (Goal sequent),"")
    _            -> (tree, prGoalId ints +++ "does not exist")
@@ -64,9 +64,9 @@ applicableRules calc sequent = [ ((i,r),seqs r) | (i,r) <- calc, ok r] where
             Just ss -> ss
             _       -> []
 
-allApplicableRules :: AbsCalculus -> Sequent -> 
+allApplicableRules :: AbsCalculus -> Sequent ->
   [((Sequent,(Int,Int)),((Ident,AbsRule),Obligations))]
-allApplicableRules calc sequent = 
+allApplicableRules calc sequent =
     [((sq',i),app) | (sq',i) <- ordsOfSequent sequent,
                      app     <- applicableRules calc sq']
 
@@ -74,8 +74,8 @@ replace :: Proof -> [Int] -> Proof -> Proof
 replace tree ints tree' =
   case (tree,tail ints) of
     (_, []) -> tree'
-    (Proof c s trs, k:n) | k <= length trs  -> 
-                            Proof c s (t1 ++ [tr'] ++ tail t2) 
+    (Proof c s trs, k:n) | k <= length trs  ->
+                            Proof c s (t1 ++ [tr'] ++ tail t2)
                                  where (t1,t2) = splitAt (k-1) trs
                                        tr' = replace (head t2) (k:n) tree'
     _       -> tree
@@ -100,4 +100,3 @@ tryMethod calculus limit sequent =
                                pp           <- tryToEach (limit - 1) ss]
   where
    tryToEach n ss = combinations (map (tryMethod calculus n) [x | Left x  <- ss])
-

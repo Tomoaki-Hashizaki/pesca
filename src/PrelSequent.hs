@@ -23,7 +23,7 @@ infixr 3 <<<
 -- list operations
 
 nub :: Eq a => [a] -> [a]
-nub l = case l of 
+nub l = case l of
           []  -> []
           a:k -> if elem a k then nub k else a : nub k
 
@@ -45,7 +45,7 @@ okError c = case c of Ok a -> a
 -- printing
 
 indent :: Int -> [String] -> [String]
-indent n ss = map (replicate n ' ' ++) ss
+indent n = map (replicate n ' ' ++)
 
 a +++ b  = a ++ " "  ++ b
 a ++++ b = a ++ "\n" ++ b
@@ -118,8 +118,8 @@ some :: Parser a b -> Parser a [b]
 some p = (p ... many p) *** (\ (x,y) -> x:y)
 
 longestOfMany :: Parser a b -> Parser a [b]
-longestOfMany p = 
-  guarantee 
+longestOfMany p =
+  guarantee
    (p .>. (\x -> longestOfMany p .>. (\y -> succeed (x:y))) +|| succeed [])
 
 pJunk   :: Parser Char String
@@ -135,7 +135,7 @@ pTList t p = p .... many (jL t +.. p) *** (\ (x,y) -> x:y) ---- mod. AR 5/1/1999
 p1 .... p2 = p1 ... pJunk +.. p2
 
 literals :: (Eq a) => [a] -> Parser a [a]
-literals l = case l of []  -> succeed [] 
+literals l = case l of []  -> succeed []
                        a:l -> literal a ... literals l *** (\ (x,y) -> x:y)
 
 pOpt :: (Eq a) => [a] -> Parser a [a]
