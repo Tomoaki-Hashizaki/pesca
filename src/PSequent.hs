@@ -33,7 +33,7 @@ pFormula 2 =
        (\ (a,b) -> b a)
 pFormula 1 =
   pFormula 2 ...
-   (jL "->" +.. pFormula 1 *** (\b -> \a -> Impl a b)
+   (jL "->" +.. pFormula 1 *** flip Impl
     ||| succeed id)
       ***
        (\ (a,b) -> b a)

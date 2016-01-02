@@ -25,7 +25,7 @@ prCalculi = "G3i G4i G3c G3ip G4ip G3cp Geq"
 justPremises :: [(Ident, Sequent -> Maybe [Sequent])] ->
                 [(Ident, Sequent -> Maybe [Either Sequent Ident])]
 justPremises = map jP where
- jP (i,f)    = (i, \x -> mb (f x))
+ jP (i,f)    = (i, mb . f)
  mb (Just s) = Just (map Left s)
  mb Nothing  = Nothing
 

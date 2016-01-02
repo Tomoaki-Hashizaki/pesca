@@ -83,7 +83,7 @@ p1 +.. p2 = p1 .>. (\x -> p2 .>. succeed)
 p1 ..+ p2 = p1 .>. (\x -> p2 .>. (\y -> succeed x))
 
 (***) :: Parser a b -> (b -> c) -> Parser a c
-p *** f = p .>. (\x -> succeed (f x))
+p *** f = p .>. succeed . f
 
 (<<<) :: Parser a b -> c -> Parser a c  -- return
 p <<< v = p *** const v
