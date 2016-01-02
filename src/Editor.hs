@@ -158,12 +158,12 @@ pCommand calculus =
                          *** (\ (g,(i,(j,r))) -> CRefine g (i,j) r)
  |||
   jL "i" +.. pRuleIdent ... pJ pTerm
-                         *** (\ (m,t) -> CInstance m t)
+                         *** uncurry CInstance
  |||
   jL "x" +.. pRuleIdent  *** CAxioms
  |||
   jL "t" +.. pGoalId ... pJ pIntc
-                         *** (\ (g,m) -> CTry g m)
+                         *** uncurry CTry
  |||
   jL "n" +.. pSequent    *** CNew
  |||

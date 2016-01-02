@@ -115,7 +115,7 @@ many :: Parser a b -> Parser a [b]
 many p = p .>. (\x -> many p .>. (\y -> succeed (x:y))) ||| succeed []
 
 some :: Parser a b -> Parser a [b]
-some p = (p ... many p) *** (\ (x,y) -> x:y)
+some p = (p ... many p) *** uncurry (:)
 
 longestOfMany :: Parser a b -> Parser a [b]
 longestOfMany p =
@@ -129,14 +129,14 @@ pJ :: Parser Char a -> Parser Char a
 pJ p = pJunk +.. p ..+ pJunk
 
 pTList  :: String -> Parser Char a -> Parser Char [a]
-pTList t p = p .... many (jL t +.. p) *** (\ (x,y) -> x:y) ---- mod. AR 5/1/1999
+pTList t p = p .... many (jL t +.. p) *** uncurry (:) ---- mod. AR 5/1/1999
 
 (....) :: Parser Char b -> Parser Char c -> Parser Char (b,c)
 p1 .... p2 = p1 ... pJunk +.. p2
 
 literals :: (Eq a) => [a] -> Parser a [a]
 literals l = case l of []  -> succeed []
-                       a:l -> literal a ... literals l *** (\ (x,y) -> x:y)
+                       a:l -> literal a ... literals l *** uncurry (:)
 
 pOpt :: (Eq a) => [a] -> Parser a [a]
 pOpt l = succeed [] ||| literals l
@@ -150,7 +150,7 @@ jL = pJ . lits
 pParenth p = literal '(' +.. pJunk +.. p ..+ pJunk ..+ literal ')'
 pArgList p = pParenth (pTList "," p) +|| succeed [] -- (p,...,p), poss. empty
 
-longestOfSome p = (p ... longestOfMany p) *** (\ (x,y) -> x:y)
+longestOfSome p = (p ... longestOfMany p) *** uncurry (:)
 
 pFileName =
   longestOfSome (satisfy (`elem` nameChar))

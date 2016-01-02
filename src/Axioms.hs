@@ -127,7 +127,7 @@ pConclusion = pTList "&" pAtom
 pAtom  =
   pATerm .... pPrInfix .... pATerm   *** (\ (x,(p,y)) -> Atom p [x,y])
  |||
-  pPred  ... pArgList pATerm *** (\ (p,x) -> Atom p x)
+  pPred  ... pArgList pATerm ***  uncurry Atom
 
 pATerm  =
  pATerm2 ....
@@ -135,7 +135,7 @@ pATerm  =
    *** (\ (x,y) -> y x)
 
 pATerm2 =
-  pConst ... pArgList pATerm *** (\ (p,x) -> Appl p x)
+  pConst ... pArgList pATerm *** uncurry Appl
  |||
   pVar *** Par
  |||

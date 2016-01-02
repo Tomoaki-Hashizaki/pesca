@@ -12,15 +12,15 @@ pContext = pTList "," (pFormula 1) ||| succeed []
 
 pFormula :: Int -> Parser Char Formula  -- Int is precedence number
 pFormula 3 =
-     pPred .... pArgList pTerm        *** (\ (p,x) -> Predic p x)
+     pPred .... pArgList pTerm        *** uncurry Predic
  ||| pTerm .... pPrInfix .... pTerm   *** (\ (x,(p,y)) -> Predic p [x,y])
- ||| pScheme ... pArgList pTerm       *** (\ (p,x) -> Scheme p x)
+ ||| pScheme ... pArgList pTerm       *** uncurry Scheme
  ||| lits "_|_"                       <<< Falsum
  ||| lits "~" +.. pJ (pFormula 3)     *** Neg
  ||| lits "(" +.. jL "/A" +..
-     pJ pVar ... lits ")" +.. pFormula 3 *** (\ (x,a) -> Univ x a)
+     pJ pVar ... lits ")" +.. pFormula 3 *** uncurry Univ
  ||| lits "(" +.. jL "/E" +..
-     pJ pVar ... lits ")" +.. pFormula 3 *** (\ (x,a) -> Exist x a)
+     pJ pVar ... lits ")" +.. pFormula 3 *** uncurry Exist
  ||| pParenth (pFormula 1)
 pFormula 2 =
   pFormula 3 ...
@@ -44,7 +44,7 @@ pTerm =
    *** (\ (x,y) -> y x)
 
 pTerm2 =
-  pConst .... pArgList pTerm  *** (\ (f,x) -> Apply f x)
+  pConst .... pArgList pTerm  *** uncurry Apply
  +||
   pVar                        *** Var
  |||
