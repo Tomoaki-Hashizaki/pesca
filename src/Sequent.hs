@@ -86,8 +86,7 @@ nodesOfProof = giveNums [] 1 where
   case tr of
     Goal s        -> [((n ++ [k], s),True)]
     Proof _ s trs -> ((n ++ [k], s),False) :
-                         foldl (++) []
-                            [giveNums (n ++ [k]) i t | (i,t) <- zip [1..] trs]
+                         concat[giveNums (n ++ [k]) i t | (i,t) <- zip [1..] trs]
     _             -> []
 
 paramsOfProof :: Proof -> [Ident]
@@ -95,7 +94,7 @@ paramsOfProof tree =
   case tree of
     Goal s        -> []
     Param x       -> [x]
-    Proof _ s trs -> foldl (++) [] (map paramsOfProof trs)
+    Proof _ s trs -> concatMap paramsOfProof trs
 
 conclusionOfProof :: Proof -> Sequent
 conclusionOfProof tree =
@@ -161,13 +160,13 @@ makeParams subst term =
     _             -> term
 
 notOccur :: Ident -> [Formula] -> Bool
-notOccur x cont = not (x `elem` foldl (++) [] (map freeVariables cont))
+notOccur x cont = not (x `elem` concatMap freeVariables cont)
 
 freeVariables :: Formula -> [Ident]
 freeVariables formula =
  case formula of
-    Scheme p terms  -> foldl (++) [] (map freeVariablesOfTerm terms)
-    Predic p terms  -> foldl (++) [] (map freeVariablesOfTerm terms)
+    Scheme p terms  -> concatMap freeVariablesOfTerm terms
+    Predic p terms  -> concatMap freeVariablesOfTerm terms
     Neg  a          -> freeVariables a
     Conj a b        -> freeVariables a ++ freeVariables b
     Disj a b        -> freeVariables a ++ freeVariables b
@@ -178,7 +177,7 @@ freeVariables formula =
 
 freeVariablesOfTerm t =
     case t of
-      Apply f terms -> foldl (++) [] (map freeVariablesOfTerm terms)
+      Apply f terms -> concatMap freeVariablesOfTerm terms
       Var x         -> [x]
       _             -> []
 

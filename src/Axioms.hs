@@ -21,15 +21,15 @@ axiom2rule (prems,concl) =
       Just insts -> Just (map (Left . mkPrem insts) prems ++ map Right params)
        where
         mkPrem i p = (substFormula s substTerm i (atom2formula params p) : ant, suc)
-                      where s = foldl (++) [] (map (freeVariablesOfTerm . snd) i)
+                      where s = concatMap (freeVariablesOfTerm . snd) i
         params = nub [c | Atom _ args <- prems,
-                          c <- foldl (++) [] (map parOf args),
+                          c <- concatMap parOf args,
                           not (c `elem` [d | Atom _ xx <- concl,
-                                             d <- foldl (++) [] (map parOf xx)])]
+                                             d <- concatMap parOf xx])]
         parOf t =
          case t of
            Par x    -> [x]
-           Appl _ y -> foldl (++) [] (map parOf y)
+           Appl _ y -> concatMap parOf y
       _          -> Nothing
 
 findInstanceOfAtoms :: [Atom] -> [Formula] -> Maybe [(Ident,Term)]
@@ -57,14 +57,14 @@ instanceOfAtoms atoms formulae =
       case formula of
         Predic f xx | f == pred && length xx == length args -> True
         _ -> False
-    insts = foldl (++) [] (map tryInst (zip args1 args2))
+    insts = concatMap tryInst (zip args1 args2)
     tryInst (a1,a2) =
      case (a1,a2) of
        (Par a,f)                       -> [(a,Just f)]
-       (Appl c a, Apply c' a') | c==c' -> foldl (++) [] (map tryInst (zip a a'))
+       (Appl c a, Apply c' a') | c==c' -> concatMap tryInst (zip a a')
        _                               -> [("x",Nothing)]
-    args1 = foldl (++) [] [xx | Atom   _ xx <- atoms]
-    args2 = foldl (++) [] [xx | Predic _ xx <- formulae]
+    args1 = concat [xx | Atom   _ xx <- atoms]
+    args2 = concat [xx | Predic _ xx <- formulae]
     consistent t = all (`lookupIsUnique` t) (map fst t)
     complete t =
      case t of

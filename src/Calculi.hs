@@ -7,7 +7,7 @@ import Sequent
 data Calculus = Calculus [Ident]
 
 rulesOfCalculus :: Calculus -> AbsCalculus
-rulesOfCalculus (Calculus calcs) = foldl (++) [] (map rOf calcs) where
+rulesOfCalculus (Calculus calcs) = concatMap rOf calcs where
  rOf calc =
   case calc of
    "G3ip"  -> justPremises $ gxpL ++ gipR ++ g3iLImpl
