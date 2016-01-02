@@ -22,9 +22,9 @@ axiom2rule (prems,concl) =
        where
         mkPrem i p = (substFormula s substTerm i (atom2formula params p) : ant, suc)
                       where s = foldl (++) [] (map (freeVariablesOfTerm . snd) i)
-        params = nub [c | Atom _ args <- prems, 
-                          c <- foldl (++) [] (map parOf args), 
-                          not (c `elem` [d | Atom _ xx <- concl, 
+        params = nub [c | Atom _ args <- prems,
+                          c <- foldl (++) [] (map parOf args),
+                          not (c `elem` [d | Atom _ xx <- concl,
                                              d <- foldl (++) [] (map parOf xx)])]
         parOf t =
          case t of
@@ -33,7 +33,7 @@ axiom2rule (prems,concl) =
       _          -> Nothing
 
 findInstanceOfAtoms :: [Atom] -> [Formula] -> Maybe [(Ident,Term)]
-findInstanceOfAtoms atoms formulae = 
+findInstanceOfAtoms atoms formulae =
  case (atoms,formulae) of
    ([],_)   -> Just []
    (_, [])   -> Nothing
@@ -45,15 +45,15 @@ findInstanceOfAtoms atoms formulae =
                       _      -> findOne ss
 
 instanceOfAtoms :: [Atom] -> [Formula] -> Maybe [(Ident,Term)]
-instanceOfAtoms atoms formulae = 
-  if   length atoms == length formulae    && 
+instanceOfAtoms atoms formulae =
+  if   length atoms == length formulae    &&
        all matchForm (zip atoms formulae) &&
        complete insts                     &&
        consistent insts
   then Just [(a,f) | (a,Just f) <- insts]
   else Nothing
    where
-    matchForm ((Atom pred args),formula) = 
+    matchForm ((Atom pred args),formula) =
       case formula of
         Predic f xx | f == pred && length xx == length args -> True
         _ -> False
@@ -66,7 +66,7 @@ instanceOfAtoms atoms formulae =
     args1 = (foldl (++) [] [xx | Atom   _ xx <- atoms])
     args2 = (foldl (++) [] [xx | Predic _ xx <- formulae])
     consistent t = all (`lookupIsUnique` t) (map fst t)
-    complete t = 
+    complete t =
      case t of
        (_,Nothing):_ -> False
        (_,Just _):t' -> complete t'
@@ -82,7 +82,7 @@ atom2formula params (Atom f xx) = Predic f (map aterm2term xx) where
 -----------------
 
 prAxiom :: Axiom -> String
-prAxiom (prems,concl) = 
+prAxiom (prems,concl) =
  case prems of
    [] -> prOneInAxiom concl
    _  -> prems' ++++ replicate (max (length prems') (length concl')) '-' ++++ concl'
@@ -104,11 +104,11 @@ prOneInAxiom atoms =
 prLatexAxioms (ns,axx) =
  "\\documentstyle[proof]{article}" ++++
  "\\begin{document}" ++++
- ns ++++ -- new commands 
+ ns ++++ -- new commands
  foldr (++++) "" ["\\[" ++++ prLatexAxiom ax ++++ "\\]" | ax <- axx] ++++
  "\\end{document}"
 
-prLatexAxiom (name,([],concl)) = 
+prLatexAxiom (name,([],concl)) =
  makeLatex (prOneInAxiom concl) ++ "^{" ++ makeLatex name ++"}"
 prLatexAxiom (name,(prems,concl)) =
  "\\infer[{\\scriptsize" +++ makeLatex name  ++ "}]{" ++++
@@ -118,26 +118,26 @@ prLatexAxiom (name,(prems,concl)) =
 -----------------
 
 pAxiom :: Parser Char Axiom
-pAxiom      = ((pConclusion ..+ jL "->" ||| succeed []) ... pPremises 
-                 *** (\ (x,y) -> (y,x)) 
+pAxiom      = ((pConclusion ..+ jL "->" ||| succeed []) ... pPremises
+                 *** (\ (x,y) -> (y,x))
               |||
                jL "~" +.. (pConclusion ||| pParenth pConclusion) *** (\x -> ([],x)))
 pPremises   = pTList "v" pAtom ||| lits "_|_" <<< []
 pConclusion = pTList "&" pAtom
 
-pAtom  = 
+pAtom  =
   pATerm .... pPrInfix .... pATerm   *** (\ (x,(p,y)) -> Atom p [x,y])
  |||
   pPred  ... pArgList pATerm *** (\ (p,x) -> Atom p x)
 
 pATerm  =
- pATerm2 .... 
-  (pInfix .... pATerm2 *** (\ (f,y) -> \x -> Appl f [x,y]) ||| succeed (\x -> x))
+ pATerm2 ....
+  (pInfix .... pATerm2 *** (\ (f,y) -> \x -> Appl f [x,y]) ||| succeed id)
    *** (\ (x,y) -> y x)
 
-pATerm2 = 
-  pConst ... pArgList pATerm *** (\ (p,x) -> Appl p x) 
- ||| 
+pATerm2 =
+  pConst ... pArgList pATerm *** (\ (p,x) -> Appl p x)
+ |||
   pVar *** Par
  |||
   pParenth pATerm
@@ -159,7 +159,7 @@ readAxioms s =
    (news,s') = let ss = lines s ; (ss1,ss2) = span (\l -> take 2 l /= "--") ss
                 in (unlines ss1, unlines ss2)
    remComm s =
-    case s of 
+    case s of
       []        -> []
       '-':'-':t -> remComm t2 where t2 = dropWhile  (/='\n') t
       c      :t -> c : remComm t
@@ -170,9 +170,8 @@ subsets int list =
  case int of
    0 -> [[]]
    n -> [h:t | h <- list, t <- subsets (n-1) (del h list)]
-  where 
+  where
    del x []     = []
    del x (y:ys) = if x==y then ys else y : del x ys
 
 lookupIsUnique x t = length (nub [y | (z,y) <- t, z==x]) < 2
-
