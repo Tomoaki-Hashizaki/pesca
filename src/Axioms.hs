@@ -15,8 +15,7 @@ axioms2calculus :: [(Ident,Axiom)] -> AbsCalculus
 axioms2calculus axx = [(i,axiom2rule a) | (i,a) <- axx]
 
 axiom2rule :: Axiom -> AbsRule
-axiom2rule (prems,concl) =
-  \ (ant,suc) ->
+axiom2rule (prems,concl) (ant,suc) =
     case findInstanceOfAtoms concl ant of
       Just insts -> Just (map (Left . mkPrem insts) prems ++ map Right params)
        where

@@ -77,7 +77,7 @@ fails s = []
 p1 ... p2 = p1 .>. (\x -> p2 .>. (\y -> succeed (x,y)))
 
 (+..) :: Parser a b -> Parser a c -> Parser a c
-p1 +.. p2 = p1 .>. (\x -> p2 .>. (\y -> succeed y))
+p1 +.. p2 = p1 .>. (\x -> p2 .>. succeed)
 
 (..+) :: Parser a b -> Parser a c -> Parser a b
 p1 ..+ p2 = p1 .>. (\x -> p2 .>. (\y -> succeed x))
